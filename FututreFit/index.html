@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FutureFit - AI Career & Skills Advisor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --background: #050505;
+            --surface: #111111;
+            --primary: #4f46e5;
+            --secondary: #a855f7;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+        }
+
+        .gradient-bg {
+            background-image: 
+                radial-gradient(at 20% 20%, hsla(243, 85%, 66%, 0.15) 0px, transparent 50%),
+                radial-gradient(at 80% 80%, hsla(283, 85%, 66%, 0.15) 0px, transparent 50%);
+        }
+
+        .glass-card {
+            background: rgba(17, 17, 17, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            background: rgba(31, 41, 55, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        .form-textarea {
+            min-height: 120px;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            background: rgba(55, 65, 81, 0.7);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.5);
+            outline: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        .btn-secondary {
+            background-color: rgba(31, 41, 55, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background-color: rgba(55, 65, 81, 1);
+            border-color: var(--secondary);
+        }
+
+
+        .nav-link {
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary);
+            transition: width 0.3s;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Modal Styles */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-backdrop.active .modal-content {
+             transform: scale(1);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .slide-in-left {
+             animation: slideInLeft 0.8s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="gradient-bg">
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-lg border-b border-white/5">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
+                Future<span class="font-light">Fit</span>
+            </a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#about" class="nav-link text-gray-400">About</a>
+                <a href="#how-it-works" class="nav-link text-gray-400">How It Works</a>
+                <a href="#advisor" class="nav-link text-gray-400">Advisor</a>
+            </div>
+            <a href="#advisor" class="md:hidden bg-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center justify-center text-center pt-20">
+        <div class="container mx-auto px-6">
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-white leading-tight mb-4 slide-in-left">
+                Navigate Your <span class="bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500">Future Career</span>.
+            </h1>
+            <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8 slide-in-left" style="animation-delay: 200ms;">
+                An intelligent platform for Indian students to discover their ideal career path. Get personalized roadmaps, skill analysis, and course recommendations powered by Google's Generative AI.
+            </p>
+            <a href="#advisor" class="btn-primary text-white font-bold py-4 px-10 rounded-full text-lg slide-in-left" style="animation-delay: 400ms;">
+                Find Your Path Now
+            </a>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 md:py-32">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">What is CareerAI?</h2>
+            <div class="w-24 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 mx-auto mb-8"></div>
+            <p class="max-w-3xl mx-auto text-gray-300">
+                CareerAI is a smart advisor designed to bridge the gap between education and employment in India. We leverage Google's advanced Gemini AI to analyze your unique profile—your interests, academic background, and personality—to generate a clear, actionable career plan. Stop guessing, start planning.
+            </p>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-20 md:py-32 bg-black/20">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Get Your Roadmap in 3 Simple Steps</h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 mx-auto"></div>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 text-center">
+                <div class="border border-white/10 p-8 rounded-2xl">
+                    <div class="mx-auto mb-4 bg-indigo-900/50 h-16 w-16 rounded-full flex items-center justify-center"><i data-lucide="file-text" class="h-8 w-8 text-indigo-400"></i></div>
+                    <h3 class="text-xl font-bold mb-2">1. Fill the Form</h3>
+                    <p class="text-gray-400">Provide details about your education, interests, and work preferences. The more you share, the better the advice.</p>
+                </div>
+                <div class="border border-white/10 p-8 rounded-2xl">
+                     <div class="mx-auto mb-4 bg-purple-900/50 h-16 w-16 rounded-full flex items-center justify-center"><i data-lucide="cpu" class="h-8 w-8 text-purple-400"></i></div>
+                    <h3 class="text-xl font-bold mb-2">2. AI Analysis</h3>
+                    <p class="text-gray-400">Our powerful AI processes your inputs against a vast database of career trends and skill requirements in India.</p>
+                </div>
+                <div class="border border-white/10 p-8 rounded-2xl">
+                     <div class="mx-auto mb-4 bg-green-900/50 h-16 w-16 rounded-full flex items-center justify-center"><i data-lucide="map" class="h-8 w-8 text-green-400"></i></div>
+                    <h3 class="text-xl font-bold mb-2">3. Receive Roadmap</h3>
+                    <p class="text-gray-400">Get a personalized report with a top career match, a step-by-step learning plan, and curated course links.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advisor Section -->
+    <section id="advisor" class="py-20 md:py-32">
+        <div class="container mx-auto px-6">
+            <main id="form-section" class="w-full max-w-4xl mx-auto glass-card p-6 md:p-10 shadow-2xl">
+                 <div class="text-center mb-8">
+                    <h2 class="text-3xl md:text-4xl font-bold">Your Personal Career Advisor</h2>
+                    <p class="text-gray-400 mt-2">Let's build your profile to generate a tailored career plan.</p>
+                </div>
+                <form id="career-form">
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-lg font-semibold text-indigo-300 border-b border-white/10 pb-2 mb-4">Academic Background</h3>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="education" class="block text-sm font-medium text-gray-300 mb-2">Highest Qualification</label>
+                                    <select id="education" name="education" class="form-select w-full p-3 rounded-lg" required>
+                                        <option value="10th_pass">10th Pass</option>
+                                        <option value="12th_pass">12th Pass</option>
+                                        <option value="diploma">Diploma</option>
+                                        <option value="bachelor_degree">Bachelor's Degree</option>
+                                        <option value="master_degree">Master's Degree</option>
+                                        <option value="phd">PhD</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="stream" class="block text-sm font-medium text-gray-300 mb-2">Field/Stream</label>
+                                    <input type="text" id="stream" name="stream" class="form-input w-full p-3 rounded-lg" placeholder="e.g., Computer Science, Commerce, Arts" required>
+                                </div>
+                            </div>
+                        </div>
+                         <div>
+                            <h3 class="text-lg font-semibold text-purple-300 border-b border-white/10 pb-2 mb-4">Interests & Skills</h3>
+                            <div class="space-y-6">
+                                <div>
+                                    <label for="interests" class="block text-sm font-medium text-gray-300 mb-2">What are you passionate about outside of academics?</label>
+                                    <input type="text" id="interests" name="interests" class="form-input w-full p-3 rounded-lg" placeholder="e.g., Gaming, financial markets, painting, social media" required>
+                                </div>
+                                <div>
+                                    <label for="skills" class="block text-sm font-medium text-gray-300 mb-2">What are your current skills (technical or soft)?</label>
+                                    <input type="text" id="skills" name="skills" class="form-input w-full p-3 rounded-lg" placeholder="e.g., Java, Public Speaking, Video Editing, Teamwork" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                           <h3 class="text-lg font-semibold text-green-300 border-b border-white/10 pb-2 mb-4">Work Style & Personality</h3>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">How do you prefer to work?</label>
+                                    <select id="work-style" name="work-style" class="form-select w-full p-3 rounded-lg" required>
+                                        <option value="independently">Mostly independently</option>
+                                        <option value="team">In a collaborative team</option>
+                                        <option value="mix">A mix of both</option>
+                                        <option value="leading">Leading a team</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Which environment energizes you?</label>
+                                     <select id="work-environment" name="work-environment" class="form-select w-full p-3 rounded-lg" required>
+                                        <option value="fast_paced">Fast-paced and dynamic</option>
+                                        <option value="stable_structured">Stable and structured</option>
+                                        <option value="creative_flexible">Creative and flexible</option>
+                                        <option value="remote">Remote/Work-from-home</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-10 text-center">
+                        <button type="submit" class="btn-primary text-white font-bold py-4 px-10 rounded-full text-lg w-full md:w-auto">
+                            <span class="flex items-center justify-center">
+                                <i data-lucide="sparkles" class="mr-3 h-6 w-6"></i>
+                                Generate My Career Roadmap
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </main>
+
+            <!-- Results Section (Initially Hidden) -->
+            <section id="results-section" class="w-full max-w-6xl mx-auto mt-16 hidden">
+                <div id="loading-indicator" class="text-center p-8 hidden">
+                    <div role="status" class="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-purple-400 border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+                    <p class="mt-4 text-xl text-gray-300">Crafting your personalized career plan... This may take a moment.</p>
+                </div>
+                <div id="results-content"></div>
+                <div id="reset-container" class="text-center mt-12 hidden">
+                    <button id="reset-button" class="bg-gray-800 hover:bg-gray-700 border border-white/20 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300">
+                        Advise Another Profile
+                    </button>
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <!-- Modals -->
+    <div id="resume-modal" class="modal-backdrop">
+        <div class="modal-content glass-card p-6 md:p-8">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-purple-300 flex items-center"><i data-lucide="file-text" class="mr-3"></i>Resume Booster</h3>
+                <button id="close-resume-modal" class="text-gray-400 hover:text-white">&times;</button>
+            </div>
+            <div id="resume-modal-content"></div>
+        </div>
+    </div>
+
+    <div id="interview-modal" class="modal-backdrop">
+        <div class="modal-content glass-card p-6 md:p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-indigo-300 flex items-center"><i data-lucide="mic" class="mr-3"></i>AI Interview Coach</h3>
+                <button id="close-interview-modal" class="text-gray-400 hover:text-white">&times;</button>
+            </div>
+            <div id="interview-modal-content" class="space-y-4"></div>
+        </div>
+    </div>
+
+
+    <script>
+        lucide.createIcons();
+
+        // State variables
+        let currentJobTitle = '';
+        let interviewHistory = [];
+        
+        // DOM Elements
+        const form = document.getElementById('career-form');
+        const formSection = document.getElementById('form-section');
+        const resultsSection = document.getElementById('results-section');
+        const resultsContent = document.getElementById('results-content');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const resetButton = document.getElementById('reset-button');
+        const resetContainer = document.getElementById('reset-container');
+
+        const resumeModal = document.getElementById('resume-modal');
+        const closeResumeModalBtn = document.getElementById('close-resume-modal');
+        const resumeModalContent = document.getElementById('resume-modal-content');
+
+        const interviewModal = document.getElementById('interview-modal');
+        const closeInterviewModalBtn = document.getElementById('close-interview-modal');
+        const interviewModalContent = document.getElementById('interview-modal-content');
+        
+        const PROXY_URL = `/.netlify/functions/gemini-proxy`;
+        
+        // Main form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const userProfile = Object.fromEntries(formData.entries());
+
+            formSection.classList.add('hidden');
+            resultsSection.classList.remove('hidden');
+            loadingIndicator.classList.remove('hidden');
+            resultsContent.innerHTML = '';
+            resetContainer.classList.add('hidden');
+            window.scrollTo({ top: resultsSection.offsetTop - 100, behavior: 'smooth' });
+
+            const systemPrompt = `
+                You are a top-tier AI career counselor for the Indian job market. Your task is to generate a detailed, personalized, and encouraging career roadmap for a student in India based on their profile.
+                The response MUST be a valid JSON object.
+                The JSON should have two main keys: "best_match_career" and "alternative_career_paths".
+
+                1.  "best_match_career": This is an object representing the top recommendation. It MUST contain:
+                    -   "title": The job title (e.g., "AI/ML Engineer").
+                    -   "description": A 2-3 sentence paragraph explaining why this career is an excellent match for the user's profile, referencing their inputs.
+                    -   "market_scope_india": A brief, optimistic overview of the job prospects, demand, and potential salary range (e.g., 6-12 LPA for freshers) for this role in India as of late 2025.
+                    -   "learning_roadmap": An array of objects, representing a step-by-step plan. Each object MUST have:
+                        -   "stage": The stage name (e.g., "Month 1-3: Foundational Skills", "Month 4-6: Intermediate Concepts", "Month 7-9: Advanced Specialization", "Month 10-12: Project Building & Internship Prep").
+                        -   "details": A bulleted list (as a single string with '\\n- ' separators) of key topics or skills to learn in that stage.
+                    -   "specific_courses": An array of 3-4 specific course/resource objects. Each object MUST have:
+                        -   "name": The course or resource title.
+                        -   "platform": The platform (e.g., "Coursera", "NPTEL", "Udemy", "freeCodeCamp").
+                        -   "link": A valid, direct URL to the resource.
+
+                2.  "alternative_career_paths": An array of 2 other career path objects. Each object MUST have:
+                    -   "title": The job title.
+                    -   "reason": A short sentence explaining why it's a viable alternative.
+
+                Your tone must be positive, modern, and highly relevant to the Indian context.
+            `;
+
+            const userQuery = `Here is my profile: ${JSON.stringify(userProfile)}`;
+
+            try {
+                const payload = {
+                    systemPrompt,
+                    userQuery,
+                    isJson: true,
+                    history: [] // Not needed for the main query
+                };
+                const data = await callProxy(payload);
+                currentJobTitle = data.best_match_career.title;
+                displayResults(data);
+            } catch (error) {
+                console.error("Error fetching AI advice:", error);
+                displayError("Oops! The AI is taking a coffee break. We couldn't generate your roadmap. Please try again.");
+            } finally {
+                loadingIndicator.classList.add('hidden');
+                resetContainer.classList.remove('hidden');
+            }
+        });
+        
+        // Proxy Call Helper
+        async function callProxy(payload) {
+             const response = await fetchWithExponentialBackoff(PROXY_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                 const errorBody = await response.text();
+                 throw new Error(`Proxy error! status: ${response.status}. Body: ${errorBody}`);
+            }
+            return await response.json();
+        }
+
+
+        // Fetch with Backoff
+        async function fetchWithExponentialBackoff(url, options, retries = 3, backoff = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.status !== 429) return response;
+                    await new Promise(resolve => setTimeout(resolve, backoff));
+                    backoff *= 2;
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, backoff));
+                    backoff *= 2;
+                }
+            }
+        }
+        
+        // Display Logic
+        function displayError(message) {
+            resultsContent.innerHTML = `<div class="fade-in glass-card p-8 text-center"><i data-lucide="server-crash" class="h-16 w-16 text-red-400 mx-auto mb-4"></i><h2 class="text-2xl font-bold text-red-400 mb-2">An Error Occurred</h2><p class="text-gray-300">${message}</p></div>`;
+            lucide.createIcons();
+        }
+
+        function displayResults(data) {
+            if (!data.best_match_career) {
+                displayError("The AI returned an unexpected response. Please try again.");
+                return;
+            }
+
+            const bestMatch = data.best_match_career;
+            const alternatives = data.alternative_career_paths;
+
+            let html = `
+                <div class="text-center mb-12 fade-in">
+                    <h2 class="text-4xl font-bold text-white">Your AI-Generated Career Plan</h2>
+                    <p class="text-gray-400 mt-2">Here is the best match based on your profile, complete with a learning roadmap.</p>
+                </div>
+
+                <div class="glass-card p-8 md:p-10 mb-12 fade-in" style="animation-delay: 200ms;">
+                    <span class="text-sm font-bold uppercase tracking-widest text-indigo-400">Top Recommendation</span>
+                    <h3 class="text-3xl md:text-4xl font-bold mt-2">${bestMatch.title}</h3>
+                    <p class="text-gray-300 mt-4 max-w-3xl">${bestMatch.description}</p>
+                    <div class="mt-6 p-4 bg-black/30 border border-white/10 rounded-lg">
+                        <p class="flex items-center text-sm text-gray-300"><i data-lucide="trending-up" class="h-5 w-5 mr-3 text-green-400"></i><strong class="mr-2 text-white">Scope in India:</strong> ${bestMatch.market_scope_india}</p>
+                    </div>
+                    
+                    <!-- New Feature Buttons -->
+                    <div class="mt-8 flex flex-col md:flex-row gap-4">
+                        <button id="resume-booster-btn" class="btn-secondary font-semibold py-3 px-6 rounded-lg flex items-center justify-center w-full"><i data-lucide="sparkles" class="mr-2 h-5 w-5 text-purple-400"></i>✨ Resume Booster</button>
+                        <button id="interview-coach-btn" class="btn-secondary font-semibold py-3 px-6 rounded-lg flex items-center justify-center w-full"><i data-lucide="sparkles" class="mr-2 h-5 w-5 text-indigo-400"></i>✨ AI Interview Coach</button>
+                    </div>
+
+                    <!-- Learning Roadmap -->
+                    <div class="mt-10">
+                        <h4 class="text-2xl font-bold mb-6">Your 12-Month Learning Roadmap</h4>
+                        <div class="space-y-6 border-l-2 border-indigo-500/30 ml-3">
+                            ${bestMatch.learning_roadmap.map((stage) => `
+                                <div class="relative pl-8">
+                                    <div class="absolute -left-3.5 top-1 h-6 w-6 bg-indigo-500 rounded-full border-4 border-gray-900"></div>
+                                    <p class="font-semibold text-indigo-300">${stage.stage}</p>
+                                    <div class="text-gray-400 mt-2 whitespace-pre-line">${stage.details.replace(/\\n/g, '\n')}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Specific Courses -->
+                    <div class="mt-10">
+                        <h4 class="text-2xl font-bold mb-6">Recommended Courses & Resources</h4>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            ${bestMatch.specific_courses.map(course => `<a href="${course.link}" target="_blank" rel="noopener noreferrer" class="block p-4 bg-black/30 rounded-lg border border-white/10 hover:bg-white/5 hover:border-purple-400 transition-all duration-300"><p class="font-semibold text-purple-300">${course.name}</p><p class="text-sm text-gray-400">${course.platform}</p></a>`).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alternative Paths -->
+                <div class="fade-in" style="animation-delay: 400ms;">
+                    <h3 class="text-2xl font-bold text-center mb-6">Alternative Career Paths to Explore</h3>
+                    <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                        ${alternatives.map(alt => `<div class="p-6 bg-gray-900/50 border border-white/10 rounded-xl"><h4 class="font-bold text-lg text-gray-200">${alt.title}</h4><p class="text-sm text-gray-400 mt-1">${alt.reason}</p></div>`).join('')}
+                    </div>
+                </div>
+            `;
+
+            resultsContent.innerHTML = html;
+            lucide.createIcons();
+            
+            document.getElementById('resume-booster-btn').addEventListener('click', handleResumeBooster);
+            document.getElementById('interview-coach-btn').addEventListener('click', handleInterviewCoach);
+        }
+
+        // Reset Logic
+        resetButton.addEventListener('click', () => {
+            resultsSection.classList.add('hidden');
+            formSection.classList.remove('hidden');
+            form.reset();
+            window.scrollTo({ top: formSection.offsetTop - 100, behavior: 'smooth' });
+        });
+        
+        // Modal Logic
+        function setupModal(modal, closeBtn) {
+            closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.classList.remove('active');
+            });
+        }
+        setupModal(resumeModal, closeResumeModalBtn);
+        setupModal(interviewModal, closeInterviewModalBtn);
+
+        // Feature: Resume Booster
+        async function handleResumeBooster() {
+            resumeModal.classList.add('active');
+            resumeModalContent.innerHTML = `<div class="text-center"><div role="status" class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-purple-400 border-r-transparent"></div><p class="mt-2">Generating keywords and bullet points...</p></div>`;
+            
+            const systemPrompt = `You are a resume expert for the Indian tech industry. For the job title "${currentJobTitle}", generate a JSON object with two keys: "keywords" and "bullet_points".
+            - "keywords": An array of 10-15 essential technical and soft skills for a fresher's resume.
+            - "bullet_points": An array of 5-7 action-oriented bullet points that a student could use on their resume, highlighting potential projects or skills acquired. Start each with an action verb.`;
+            
+            try {
+                 const payload = { systemPrompt, userQuery: `Job title: ${currentJobTitle}`, isJson: true, history: [] };
+                 const data = await callProxy(payload);
+                let content = `
+                    <h4 class="text-lg font-semibold text-gray-200 mb-2">Keywords for Skills Section</h4>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        ${data.keywords.map(k => `<span class="bg-gray-700 text-gray-200 text-sm px-3 py-1 rounded-full">${k}</span>`).join('')}
+                    </div>
+                    <h4 class="text-lg font-semibold text-gray-200 mb-2">Action-Oriented Bullet Points</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-300">
+                        ${data.bullet_points.map(p => `<li>${p}</li>`).join('')}
+                    </ul>`;
+                resumeModalContent.innerHTML = content;
+            } catch (error) {
+                resumeModalContent.innerHTML = `<p class="text-red-400">Failed to generate resume points. Please try again.</p>`;
+            }
+        }
+        
+        // Feature: AI Interview Coach
+        async function handleInterviewCoach() {
+            interviewModal.classList.add('active');
+            interviewModalContent.innerHTML = `<div class="text-center" id="interview-loader"><div role="status" class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-400 border-r-transparent"></div><p class="mt-2">Preparing your first question...</p></div>`;
+            interviewHistory = [];
+
+            const systemPrompt = `You are a friendly but professional interviewer for a fresher role of "${currentJobTitle}" in India. Start the interview by asking one introductory or behavioral question. Just provide the question, nothing else.`;
+            
+            try {
+                const payload = { systemPrompt, userQuery: "Start the interview.", isJson: false, history: [] };
+                const firstQuestion = await callProxy(payload);
+                interviewHistory.push({role: 'model', parts: [{text: firstQuestion}]});
+                renderInterviewUI(firstQuestion);
+            } catch(e) {
+                interviewModalContent.innerHTML = `<p class="text-red-400">Failed to start the interview. Please try again.</p>`;
+            }
+        }
+
+        function renderInterviewUI(question) {
+            interviewModalContent.innerHTML = `
+                <div class="p-4 bg-black/30 rounded-lg">
+                    <p class="font-semibold text-gray-300">Interviewer:</p>
+                    <p id="interview-question" class="text-white">${question}</p>
+                </div>
+                <div>
+                    <label for="user-answer" class="block text-sm font-medium text-gray-300 mb-2">Your Answer:</label>
+                    <textarea id="user-answer" class="form-textarea w-full p-3 rounded-lg" placeholder="Type your answer here..."></textarea>
+                </div>
+                <div id="feedback-section" class="hidden"></div>
+                <div id="interview-buttons" class="flex gap-4">
+                    <button id="get-feedback-btn" class="btn-secondary font-semibold py-2 px-4 rounded-lg flex-1">Get Feedback</button>
+                    <button id="next-question-btn" class="btn-primary font-semibold py-2 px-4 rounded-lg flex-1 hidden">Next Question</button>
+                </div>
+            `;
+            document.getElementById('get-feedback-btn').addEventListener('click', handleGetFeedback);
+            document.getElementById('next-question-btn').addEventListener('click', handleNextQuestion);
+        }
+
+        async function handleGetFeedback() {
+            const userAnswer = document.getElementById('user-answer').value;
+            if (!userAnswer.trim()) return;
+
+            const question = document.getElementById('interview-question').innerText;
+            const feedbackSection = document.getElementById('feedback-section');
+            const getFeedbackBtn = document.getElementById('get-feedback-btn');
+
+            getFeedbackBtn.disabled = true;
+            getFeedbackBtn.innerHTML = 'Analyzing...';
+            feedbackSection.classList.remove('hidden');
+            feedbackSection.innerHTML = `<div role="status" class="inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-white border-r-transparent"></div>`;
+
+            interviewHistory.push({role: 'user', parts: [{text: userAnswer}]});
+
+            const systemPrompt = `You are a career coach. A user was asked the following interview question for a "${currentJobTitle}" role: "${question}". Their answer was: "${userAnswer}". Provide constructive feedback. Structure your response with what they did well and areas for improvement. Keep it concise and encouraging.`;
+
+            try {
+                const payload = { systemPrompt, userQuery: "Provide feedback on the user's answer.", isJson: false, history: interviewHistory };
+                const feedback = await callProxy(payload);
+                interviewHistory.push({role: 'model', parts: [{text: feedback}]});
+                feedbackSection.innerHTML = `
+                    <p class="font-semibold text-gray-300">Feedback:</p>
+                    <div class="p-3 bg-gray-900/50 rounded-lg text-sm text-gray-300 whitespace-pre-wrap">${feedback}</div>
+                `;
+                getFeedbackBtn.classList.add('hidden');
+                document.getElementById('next-question-btn').classList.remove('hidden');
+            } catch(e) {
+                feedbackSection.innerHTML = `<p class="text-red-400">Could not get feedback. Please try again.</p>`;
+                getFeedbackBtn.disabled = false;
+                getFeedbackBtn.innerHTML = 'Get Feedback';
+            }
+        }
+        
+        async function handleNextQuestion() {
+            const loader = document.getElementById('interview-loader');
+            if (loader) loader.innerHTML = `<div class="text-center" id="interview-loader"><div role="status" class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-400 border-r-transparent"></div><p class="mt-2">Preparing next question...</p></div>`;
+            else {
+                interviewModalContent.insertAdjacentHTML('beforeend', `<div class="text-center" id="interview-loader"><div role="status" class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-400 border-r-transparent"></div><p class="mt-2">Preparing next question...</p></div>`);
+            }
+
+            const systemPrompt = `You are an interviewer for a "${currentJobTitle}" role in India, continuing a conversation. The history is provided below. Ask the next logical question, which can be technical or behavioral, but different from previous ones. Just provide the question.`;
+            
+            try {
+                const payload = { systemPrompt, userQuery: '', isJson: false, history: interviewHistory };
+                const nextQuestion = await callProxy(payload);
+                interviewHistory.push({role: 'model', parts: [{text: nextQuestion}]});
+                renderInterviewUI(nextQuestion);
+
+            } catch(e) {
+                const currentContent = document.getElementById('interview-modal-content');
+                currentContent.innerHTML += `<p class="text-red-400 text-center mt-4">Failed to get next question. You can close this and try again.</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
+
+
