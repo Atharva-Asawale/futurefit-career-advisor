@@ -4,15 +4,14 @@
 const fetch = require('node-fetch');
 
 exports.handler = async function(event, context) {
-    // Only allow POST requests
     if (event.httpMethod !== 'POST') {
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
-    // Get the API key from the environment variables
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
     if (!GEMINI_API_KEY) {
+        console.error("GEMINI_API_KEY not found in environment variables.");
         return { statusCode: 500, body: 'API key not found.' };
     }
 
@@ -22,20 +21,34 @@ exports.handler = async function(event, context) {
         const { systemPrompt, userQuery, isJson, history } = JSON.parse(event.body);
 
         let contents = history || [];
-        if (userQuery) {
-            // For main query and resume booster, userQuery is the main content.
-            // For interview feedback and next question, the history contains the context.
-             if (history.length === 0) {
-                 contents.push({ role: 'user', parts: [{ text: userQuery }] });
-            }
+        if (userQuery && history.length === 0) {
+            contents.push({ role: 'user', parts: [{ text: userQuery }] });
         }
        
-
         const payload = {
             contents: contents,
             systemInstruction: {
                 parts: [{ text: systemPrompt }]
             },
+            // **NEW: Adding safety settings to make the API more reliable**
+            safetySettings: [
+                {
+                    category: "HARM_CATEGORY_HARASSMENT",
+                    threshold: "BLOCK_NONE"
+                },
+                {
+                    category: "HARM_CATEGORY_HATE_SPEECH",
+                    threshold: "BLOCK_NONE"
+                },
+                {
+                    category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    threshold: "BLOCK_NONE"
+                },
+                {
+                    category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                    threshold: "BLOCK_NONE"
+                }
+            ]
         };
 
         if (isJson) {
@@ -50,13 +63,19 @@ exports.handler = async function(event, context) {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Gemini API Error:', errorText);
-            return { statusCode: response.status, body: errorText };
+            // **NEW: More detailed logging**
+            console.error('Gemini API Error Response:', { status: response.status, body: errorText });
+            return { statusCode: response.status, body: `Error from Gemini API: ${errorText}` };
         }
 
         const data = await response.json();
-        const text = data.candidates[0].content.parts[0].text;
         
+        if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content) {
+            console.error('Invalid response structure from Gemini:', data);
+            return { statusCode: 500, body: 'Received an invalid or empty response from the AI.' };
+        }
+        
+        const text = data.candidates[0].content.parts[0].text;
         const responsePayload = isJson ? JSON.parse(text) : text;
 
         return {
@@ -66,10 +85,10 @@ exports.handler = async function(event, context) {
         };
 
     } catch (error) {
-        console.error('Proxy Error:', error);
+        console.error('Proxy Function Error:', error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'An internal server error occurred.' }),
+            body: JSON.stringify({ error: 'An internal server error occurred in the proxy function.' }),
         };
     }
 };
