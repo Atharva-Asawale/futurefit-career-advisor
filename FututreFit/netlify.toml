@@ -1,2 +1,6 @@
 [functions]
   directory = "netlify/functions/"
+
+# This gives our function up to 26 seconds to run
+[functions."gemini-proxy"]
+  timeout = 26
